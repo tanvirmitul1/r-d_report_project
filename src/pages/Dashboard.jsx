@@ -12,7 +12,7 @@ import {
 import { api } from "../store/api";
 import { useAuth } from "../contexts/AuthContext";
 import ProjectCard from "../components/ProjectCard";
-import CreateProjectModal from "../components/CreateProject";
+import CreateProjectModal from "../components/CreateProjectModal";
 export default function Dashboard() {
   const [isOpenProjectModal, setIsOpenProjectModal] = useState(false);
   const navigate = useNavigate();

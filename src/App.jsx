@@ -8,7 +8,7 @@ import UserManagement from "./pages/UserManagement";
 import ReportForm from "./pages/ReportForm";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
-import CreateProject from "./components/CreateProject";
+import CreateProject from "./components/CreateProjectModal";
 
 function App() {
   return (

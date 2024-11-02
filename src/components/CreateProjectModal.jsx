@@ -21,7 +21,6 @@ const CreateProjectModal = ({ isOpen, closeModal }) => {
   const [projectMembers, setProjectMembers] = useState("");
   const [duration, setDuration] = useState({ startDate: "", endDate: "" });
   const [status, setStatus] = useState("active");
-
   const [createProject] = api.useCreateProjectMutation();
 
   const handleSubmit = async (e) => {
