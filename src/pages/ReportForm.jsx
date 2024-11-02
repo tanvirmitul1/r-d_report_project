@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -8,19 +8,20 @@ import {
   Paper,
   MenuItem,
   Grid,
-} from '@mui/material';
-import { api } from '../store/api';
+} from "@mui/material";
+import { api } from "../store/api";
 
 export default function ReportForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    accuracy: '',
-    status: 'draft',
-    project: location.state?.projectId || '',
+    title: "",
+    description: "",
+    accuracy: "",
+    status: "draft",
+    project: location.state?.projectId || "",
+    author: "", // Include author field
   });
 
   const [files, setFiles] = useState([]);
@@ -33,39 +34,49 @@ export default function ReportForm() {
       setFormData({
         title: report.title,
         description: report.description,
-        accuracy: report.accuracy,
+        accuracy: report.accuracy || "", // Set to empty string if accuracy is null
         status: report.status,
         project: report.project,
+        author: report.author, // Set the author if editing
       });
+      setFiles(report.files || []); // Load existing files if updating
     }
   }, [report]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataObj = new FormData();
-    Object.keys(formData).forEach(key => {
+
+    // Append the form data
+    Object.keys(formData).forEach((key) => {
       formDataObj.append(key, formData[key]);
     });
-    files.forEach(file => {
-      formDataObj.append('files', file);
+    files.forEach((file) => {
+      formDataObj.append("files", file);
     });
+
+    // Convert accuracy to a number before submitting
+    if (formData.accuracy) {
+      formDataObj.set("accuracy", Number(formData.accuracy));
+    }
 
     try {
       if (id) {
-        await updateReport({ id, ...formData });
+        await updateReport({ id, ...formDataObj });
       } else {
-        await createReport(formData);
+        await createReport(formDataObj);
       }
       navigate(`/projects/${formData.project}`);
     } catch (error) {
-      console.error('Failed to save report:', error);
+      console.error("Failed to save report:", error);
+      // Optionally show a notification to the user
     }
   };
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <Typography variant="h4" sx={{ mb: 4 }}>
-        {id ? 'Edit Report' : 'New Report'}
+        {id ? "Edit Report" : "New Report"}
       </Typography>
 
       <Paper sx={{ p: 3 }}>
@@ -75,7 +86,9 @@ export default function ReportForm() {
               fullWidth
               label="Title"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               required
             />
           </Grid>
@@ -86,7 +99,9 @@ export default function ReportForm() {
               rows={4}
               label="Description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               required
             />
           </Grid>
@@ -96,7 +111,9 @@ export default function ReportForm() {
               type="number"
               label="Accuracy (%)"
               value={formData.accuracy}
-              onChange={(e) => setFormData({ ...formData, accuracy: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, accuracy: e.target.value })
+              }
               inputProps={{ min: 0, max: 100 }}
             />
           </Grid>
@@ -106,7 +123,9 @@ export default function ReportForm() {
               select
               label="Status"
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, status: e.target.value })
+              }
               required
             >
               <MenuItem value="draft">Draft</MenuItem>
@@ -119,7 +138,7 @@ export default function ReportForm() {
               type="file"
               multiple
               onChange={(e) => setFiles(Array.from(e.target.files))}
-              style={{ display: 'none' }}
+              style={{ display: "none" }}
               id="file-input"
             />
             <label htmlFor="file-input">
@@ -129,15 +148,15 @@ export default function ReportForm() {
             </label>
             {files.length > 0 && (
               <Typography sx={{ mt: 1 }}>
-                Selected files: {files.map(f => f.name).join(', ')}
+                Selected files: {files.map((f) => f.name).join(", ")}
               </Typography>
             )}
           </Grid>
           <Grid item xs={12}>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
               <Button onClick={() => navigate(-1)}>Cancel</Button>
               <Button type="submit" variant="contained">
-                {id ? 'Update' : 'Create'} Report
+                {id ? "Update" : "Create"} Report
               </Button>
             </Box>
           </Grid>
