@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Paper, TextField, Button, Typography, Link } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, user } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
@@ -15,15 +16,18 @@ export default function Login() {
 
   useEffect(() => {
     if (user) {
-      navigate("/"); // Redirect if user is already logged in
+      // Redirect to the intended route or to the home page if no route is defined
+      const redirectPath =
+        new URLSearchParams(location.search).get("redirect") || "/";
+      navigate(redirectPath);
     }
-  }, [user, navigate]);
+  }, [user, location, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await login(formData);
-      navigate("/");
+      // After login, it will automatically redirect in useEffect
       toast.success("Login successful");
     } catch (err) {
       setError("Invalid credentials");
@@ -37,7 +41,7 @@ export default function Login() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)", // Soft gradient background
+        background: "linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)",
         padding: 2,
       }}
     >
