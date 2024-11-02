@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../store/api";
 import { useAuth } from "../contexts/AuthContext";
 import CheckIcon from "@mui/icons-material/Check";
+import { toast } from "react-toastify";
 
 const CreateProjectModal = ({ isOpen, closeModal }) => {
   const { users } = useAuth(); // Ensure users is an array of user objects
@@ -56,8 +57,9 @@ const CreateProjectModal = ({ isOpen, closeModal }) => {
 
     try {
       await createProject(projectData).unwrap();
-      alert("Project created successfully!");
+      toast.success("Project created successfully");
       navigate("/");
+      closeModal();
     } catch (error) {
       console.error("Failed to create project:", error);
       alert("Error creating project. Please try again.");
