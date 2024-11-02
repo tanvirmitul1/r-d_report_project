@@ -7,6 +7,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -14,6 +15,7 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       checkAuthStatus();
+      fetchUsers();
     } else {
       setLoading(false);
     }
@@ -31,13 +33,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get("/api/auth/users");
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    }
+  };
+
   const login = async (credentials) => {
     const response = await axios.post("/api/auth/login", credentials);
     const { token, user } = response.data;
     localStorage.setItem("token", token);
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    setUser(user); // Make sure this line sets the user correctly
-    return user; // Return user for further verification
+    setUser(user);
+    return user;
   };
 
   const register = async (userData) => {
@@ -57,8 +68,9 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    users,
     login,
-    register, // Add register to the context value
+    register,
     logout,
     loading,
   };

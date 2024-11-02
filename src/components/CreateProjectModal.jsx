@@ -3,37 +3,55 @@ import {
   TextField,
   Button,
   Box,
-  Typography,
-  Grid,
-  Paper,
   Dialog,
   DialogTitle,
+  Select,
+  MenuItem,
+  Chip,
+  Grid,
+  Paper,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import { api } from "../store/api";
-import CloseIcon from "@mui/icons-material/Close";
+import { useAuth } from "../contexts/AuthContext";
+import CheckIcon from "@mui/icons-material/Check";
+
 const CreateProjectModal = ({ isOpen, closeModal }) => {
+  const { users } = useAuth(); // Ensure users is an array of user objects
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [uniqueId, setUniqueId] = useState("");
   const [description, setDescription] = useState("");
   const [projectLead, setProjectLead] = useState("");
-  const [projectMembers, setProjectMembers] = useState("");
   const [duration, setDuration] = useState({ startDate: "", endDate: "" });
-  const [status, setStatus] = useState("active");
   const [createProject] = api.useCreateProjectMutation();
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const handleSelectChange = (event) => {
+    const value = event.target.value;
+    setSelectedUsers(value);
+  };
+
+  const handleDelete = (userId) => {
+    setSelectedUsers((prev) => prev.filter((id) => id !== userId));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!uniqueId.trim()) {
+      alert("Unique ID cannot be empty");
+      return;
+    }
 
     const projectData = {
       title,
       uniqueId,
       description,
       projectLead,
-      projectMembers: projectMembers.split(",").map((id) => id.trim()),
+      projectMembers: JSON.stringify(selectedUsers),
       duration,
-      status,
     };
 
     try {
@@ -105,27 +123,66 @@ const CreateProjectModal = ({ isOpen, closeModal }) => {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                label="Project Lead ID"
-                value={projectLead}
-                onChange={(e) => setProjectLead(e.target.value)}
-                fullWidth
-                required
-                variant="outlined"
-                margin="dense"
-              />
+              <FormControl fullWidth variant="outlined" required margin="dense">
+                <InputLabel id="project-lead-label">Project Lead</InputLabel>
+                <Select
+                  labelId="project-lead-label"
+                  value={projectLead}
+                  onChange={(e) => setProjectLead(e.target.value)}
+                  label="Project Lead"
+                >
+                  {users
+                    .filter((user) => user.userType === "projectLead")
+                    .map((user) => (
+                      <MenuItem key={user._id} value={user._id}>
+                        {user.name} (
+                        {user.userType === "projectLead" ? "lead" : ""})
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                label="Project Members (comma separated IDs)"
-                value={projectMembers}
-                onChange={(e) => setProjectMembers(e.target.value)}
-                fullWidth
-                required
-                variant="outlined"
-                margin="dense"
-              />
+              <FormControl fullWidth variant="outlined" required margin="dense">
+                <InputLabel id="user-select-label">Project Members</InputLabel>
+                <Select
+                  labelId="user-select-label"
+                  multiple
+                  value={selectedUsers}
+                  onChange={handleSelectChange}
+                >
+                  {users.map((user) => (
+                    <MenuItem
+                      key={user._id}
+                      value={user._id}
+                      disabled={selectedUsers.includes(user._id)}
+                    >
+                      {selectedUsers.includes(user._id) && <CheckIcon />}
+                      {user.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {selectedUsers.map((id) => {
+                  const user = users.find((user) => user._id === id);
+                  return (
+                    user && (
+                      <Chip
+                        key={id}
+                        label={`${
+                          user.name.length > 5
+                            ? user.name.slice(0, 5) + "..."
+                            : user.name
+                        }`}
+                        onDelete={() => handleDelete(id)}
+                      />
+                    )
+                  );
+                })}
+              </Box>
             </Grid>
+
             <Grid item xs={12} sm={6}>
               <TextField
                 type="date"
