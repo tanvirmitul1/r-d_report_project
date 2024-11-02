@@ -61,8 +61,7 @@ const CreateProjectModal = ({ isOpen, closeModal }) => {
       navigate("/");
       closeModal();
     } catch (error) {
-      console.error("Failed to create project:", error);
-      alert("Error creating project. Please try again.");
+      toast.error("Failed to create project");
     }
   };
 
