@@ -57,7 +57,7 @@ const CreateProjectModal = ({ isOpen, closeModal }) => {
     try {
       await createProject(projectData).unwrap();
       alert("Project created successfully!");
-      navigate("/dashboard");
+      navigate("/");
     } catch (error) {
       console.error("Failed to create project:", error);
       alert("Error creating project. Please try again.");

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -9,12 +9,12 @@ import {
   Tabs,
   Tab,
   CircularProgress,
-} from '@mui/material';
-import { api } from '../store/api';
-import { useAuth } from '../contexts/AuthContext';
-import ReportList from '../components/ReportList';
-import TeamList from '../components/TeamList';
-import ResearchPaperList from '../components/ResearchPaperList';
+} from "@mui/material";
+import { api } from "../store/api";
+import { useAuth } from "../contexts/AuthContext";
+import ReportList from "../components/ReportList";
+import TeamList from "../components/TeamList";
+import ResearchPaperList from "../components/ResearchPaperList";
 
 export default function ProjectDetails() {
   const { id } = useParams();
@@ -28,12 +28,21 @@ export default function ProjectDetails() {
   }
 
   const isProjectLead = user._id === project.projectLead._id;
-  const isMember = project.projectMembers.some(member => member._id === user._id);
-  const canEdit = user.userType === 'admin' || isProjectLead;
+  const isMember = project?.projectMembers.some(
+    (member) => member._id === user._id
+  );
+  const canEdit = user.userType === "admin" || isProjectLead;
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box
+        sx={{
+          mb: 4,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography variant="h4">{project.title}</Typography>
         {canEdit && (
           <Button
@@ -46,7 +55,10 @@ export default function ProjectDetails() {
       </Box>
 
       <Paper sx={{ mb: 4 }}>
-        <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+        <Tabs
+          value={activeTab}
+          onChange={(e, newValue) => setActiveTab(newValue)}
+        >
           <Tab label="Overview" />
           <Tab label="Reports" />
           <Tab label="Research Papers" />
@@ -58,12 +70,22 @@ export default function ProjectDetails() {
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>Description</Typography>
+              <Typography variant="h6" gutterBottom>
+                Description
+              </Typography>
               <Typography>{project.description}</Typography>
               <Box sx={{ mt: 2 }}>
-                <Typography><strong>Status:</strong> {project.status}</Typography>
-                <Typography><strong>Duration:</strong> {new Date(project.duration.startDate).toLocaleDateString()} - {new Date(project.duration.endDate).toLocaleDateString()}</Typography>
-                <Typography><strong>Project Lead:</strong> {project.projectLead.name}</Typography>
+                <Typography>
+                  <strong>Status:</strong> {project.status}
+                </Typography>
+                <Typography>
+                  <strong>Duration:</strong>{" "}
+                  {new Date(project.duration.startDate).toLocaleDateString()} -{" "}
+                  {new Date(project.duration.endDate).toLocaleDateString()}
+                </Typography>
+                <Typography>
+                  <strong>Project Lead:</strong> {project.projectLead.name}
+                </Typography>
               </Box>
             </Paper>
           </Grid>
@@ -71,23 +93,17 @@ export default function ProjectDetails() {
       )}
 
       {activeTab === 1 && (
-        <ReportList 
-          projectId={id} 
-          canAdd={canEdit || isMember} 
-        />
+        <ReportList projectId={id} canAdd={canEdit || isMember} />
       )}
 
       {activeTab === 2 && (
-        <ResearchPaperList 
-          projectId={id} 
-          canAdd={canEdit || isMember} 
-        />
+        <ResearchPaperList projectId={id} canAdd={canEdit || isMember} />
       )}
 
       {activeTab === 3 && (
-        <TeamList 
-          projectId={id} 
-          canManageTeam={canEdit} 
+        <TeamList
+          projectId={id}
+          canManageTeam={canEdit}
           members={project.projectMembers}
           lead={project.projectLead}
         />

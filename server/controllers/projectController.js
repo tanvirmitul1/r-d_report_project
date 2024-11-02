@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Project from "../models/Project.js";
 
 export const createProject = async (req, res) => {
@@ -9,17 +10,22 @@ export const createProject = async (req, res) => {
       projectLead,
       projectMembers,
       duration,
-      status,
     } = req.body;
+
+    // Parse projectMembers from a JSON string to an array
+    const parsedProjectMembers = Array.isArray(JSON.parse(projectMembers))
+      ? JSON.parse(projectMembers).map(
+          (member) => new mongoose.Types.ObjectId(member)
+        ) // Use 'new' here
+      : [];
 
     const newProject = new Project({
       title,
       uniqueId,
       description,
-      projectLead,
-      projectMembers,
+      projectLead: new mongoose.Types.ObjectId(projectLead),
+      projectMembers: parsedProjectMembers,
       duration,
-      status,
     });
 
     await newProject.save();
@@ -42,6 +48,23 @@ export const getProjects = async (req, res) => {
   } catch (error) {
     console.error("Error fetching projects:", error);
     res.status(500).json({ message: "Failed to fetch projects" });
+  }
+};
+
+export const getSingleProject = async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id)
+      .populate("projectLead", "name")
+      .populate("projectMembers", "name");
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    res.status(200).json(project);
+  } catch (error) {
+    console.error("Error fetching project:", error);
+    res.status(500).json({ message: "Failed to fetch project" });
   }
 };
 
